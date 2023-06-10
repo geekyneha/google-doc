@@ -1,6 +1,7 @@
 .header {
   
   height: 4rem;
+  background-color: #F9FBFD;
 }
 .edit-page {
   height: 92vh;
@@ -8,5 +9,13 @@
 }
 .edit-bar {
   height: 3rem;
-  border: 1px solid blue;
+
 }
+button{
+padding: 5px;
+background-color: rgb(210, 210, 237) ;
+border-radius: 20px;
+margin: 5px 10px;
+border: none;
+}
+

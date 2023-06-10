@@ -61,23 +61,25 @@
 .page-box {
   display: flex;
   margin: 1rem;
-  
+  min-height:80vh ;
   border: 1px solid rgb(218, 217, 217);
   justify-content: center;
 }
 .page {
   margin-top: 1rem;
   border: 1px solid rgb(218, 217, 217);
+  width: 70vw;
+  min-height: 70vh;
 }
 textarea {
   width: 900px;
-  height: 65vh;
+   height: 40vh;
   outline: none;
   border: none;
   padding: 4rem;
-}
+} 
 
-.text-bold {
+ext-bold {
   font-weight: bold;
 }
 .text-italic {
@@ -106,9 +108,24 @@ textarea {
   left: 20px;
   z-index: 20;
 }
+.text-spacing{
+  line-height: 1.5;
+}
+.bullet-list{
+list-style: circle;
+}
+.numeric-list{
+  list-style-type: decimal;
+}
+
 .color1 {
   width: 20px;
   height: 20px;
   margin: 5px;
   border-radius: 10px;
+}
+.input-image{
+ width: 40ww;
+ height: 40vh;
+ margin: 8rem;
 }

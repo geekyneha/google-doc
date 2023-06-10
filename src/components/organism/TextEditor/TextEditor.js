@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./textEditor.module.css";
 import { colors } from "../../../../src/const";
 import {
@@ -30,6 +30,7 @@ import {
 } from "react-icons/ai";
 import { BsPlus } from "react-icons/bs";
 import html2pdf from "html2pdf.js";
+import { style } from "@mui/system";
 
 const TextEditor = () => {
   const [isBoldClicked, setIsBoldClickd] = useState(false);
@@ -40,13 +41,52 @@ const TextEditor = () => {
   const [isAlign, setIsAlign] = useState(false);
   const [isAlignCenter, setIsAlignCenter] = useState(false);
   const [count, setCount] = useState(20);
+  const [indent, setIndent] = useState(0);
   const [textareaValue, setTextareaValue] = useState("");
   const contentRef = useRef(null);
   const [selectedWidth, setSelectedWidth] = useState("fit-content");
   const [selectedFont, setSelectedFont] = useState("cursive");
   const [isChangeColorClicked, setISChangeColorClicked] = useState(false);
   const [isChangeColor, setISChangeColor] = useState(false);
+  const [isSpacingClicekd, setIsSpacingClicked] = useState(false);
+  const [isListBullet, setISListBullet] = useState(false);
+  const [isListNum, setISListNum] = useState(false);
   const [color, setColor] = useState("");
+  const fileInputRef = useRef(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const redoStackRef = useRef([]);
+  const undoStackRef = useRef([]);
+
+  useEffect(() => {
+    const savedText = localStorage.getItem("Text");
+    const savedImage = localStorage.getItem("Image");
+    if (savedText) {
+      setTextareaValue(savedText);
+    }
+
+    if (savedImage) {
+      setSelectedImage(savedImage);
+    }
+  });
+
+  function handleUndo() {
+    if (undoStackRef.current.length > 1) {
+      const currentValue = undoStackRef.current.pop();
+
+      redoStackRef.current.push(currentValue);
+      setTextareaValue(undoStackRef.current[undoStackRef.current.length - 1]);
+      console.log(currentValue);
+    }
+  }
+
+  function handleRedo() {
+    if (redoStackRef.current.length > 0) {
+      const currentValue = redoStackRef.current.pop();
+      undoStackRef.current.push(currentValue);
+      setTextareaValue(currentValue);
+      console.log(currentValue);
+    }
+  }
 
   function handleBold() {
     setIsBoldClickd(!isBoldClicked);
@@ -58,10 +98,16 @@ const TextEditor = () => {
     setIsUnderLineClicked(!isUnderLineClicked);
   }
   function handleDecreaseCount() {
-    setCount(count - 1);
+    if (count !== 0) setCount(count - 1);
   }
   function handleIncreaseCount() {
     setCount(count + 1);
+  }
+  function handleDecreaseIndent() {
+    if (indent !== 0) setIndent((prevIndent) => prevIndent - 1);
+  }
+  function handleIncreaseIndent() {
+    setIndent((prevIndent) => prevIndent + 1);
   }
   function handleAlign() {
     setIsAlign(!isAlign);
@@ -93,7 +139,30 @@ const TextEditor = () => {
     document.body.removeChild(element);
   }
   function handleTextareaChange(event) {
-    setTextareaValue(event.target.value);
+    const newValue = event.target.value;
+    setTextareaValue(newValue);
+    undoStackRef.current.push(newValue);
+    redoStackRef.current = [];
+    localStorage.setItem("Text", newValue);
+  }
+
+  function handleSpacing() {
+    setIsSpacingClicked(!isSpacingClicekd);
+  }
+  function handleListBullet() {
+    setISListBullet(!isListBullet);
+  }
+  function handleListNumber() {
+    setISListNum(!isListNum);
+  }
+  function handleImageClick() {
+    fileInputRef.current.click();
+  }
+  function handleUploadImage(event) {
+    const file = event.target.files[0];
+    console.log(file);
+    setSelectedImage(URL.createObjectURL(file));
+    localStorage.setItem("Image", URL.createObjectURL(file));
   }
   function handleDownloadPDF() {
     const element = contentRef.current;
@@ -115,10 +184,10 @@ const TextEditor = () => {
         <div className={styles["left-items"]}>
           <div className={styles["first-div"]}>
             <span className={styles[""]}>
-              <RiArrowGoBackLine />
+              <RiArrowGoBackLine onClick={handleUndo} />
             </span>
 
-            <span className={styles[""]}>
+            <span className={styles[""]} onClick={handleRedo}>
               <RiArrowGoForwardLine />
             </span>
             <span>
@@ -214,7 +283,7 @@ const TextEditor = () => {
               <MdChat size={20} />
             </span>
             <span className={styles[""]}>
-              <MdImage size={20} />
+              <MdImage size={20} onClick={handleImageClick} />
             </span>
           </div>
           <div className={styles["seventh-div"]}>
@@ -238,24 +307,30 @@ const TextEditor = () => {
             )}
 
             <span className={styles[""]}>
-              <MdFormatLineSpacing size={20} />
+              <MdFormatLineSpacing size={20} onClick={handleSpacing} />
             </span>
             <span className={styles[""]}>
               <MdChecklist size={20} />
             </span>
             <span className={styles[""]}>
-              <MdFormatListBulleted size={20} />
+              <MdFormatListBulleted size={20} onClick={handleListBullet} />
             </span>
             <span className={styles[""]}>
-              <MdFormatListNumbered size={20} />
-            </span>
-
-            <span className={styles[""]}>
-              <MdFormatIndentDecrease size={20} />
+              <MdFormatListNumbered size={20} onClick={handleListNumber} />
             </span>
 
             <span className={styles[""]}>
-              <MdFormatIndentIncrease size={20} />
+              <MdFormatIndentDecrease
+                size={20}
+                onClick={handleDecreaseIndent}
+              />
+            </span>
+
+            <span className={styles[""]}>
+              <MdFormatIndentIncrease
+                size={20}
+                onClick={handleIncreaseIndent}
+              />
             </span>
             <span className={styles[""]}>
               <MdFormatClear size={20} />
@@ -294,22 +369,46 @@ const TextEditor = () => {
         <div className={styles["page"]} style={{ width: selectedWidth }}>
           <div>
             <textarea
+              minLength="200"
+              type="text"
               style={{
                 fontSize: `${count}px`,
                 fontFamily: `${selectedFont}`,
                 color: color,
+                marginLeft: `${indent}rem`,
               }}
               id="myTextArea"
-              className={`${isBoldClicked ? styles["text-bold"] : ""} ${
-                isItalicClicked ? styles["text-italic"] : ""
-              } ${isUnderLineClicked ? styles["text-underLine"] : ""} ${
-                isAlignRightClicked ? styles["text-right"] : ""
-              } ${isAlignLeftClicked ? styles["text-left"] : ""} ${
-                isAlignCenter ? styles["text-center"] : ""
+              className={`${styles["textarea-css"]}${styles["text"]}${
+                isBoldClicked ? styles["text-bold"] : ""
+              } ${isItalicClicked ? styles["text-italic"] : ""} ${
+                isUnderLineClicked ? styles["text-underLine"] : ""
+              } ${isAlignRightClicked ? styles["text-right"] : ""} ${
+                isAlignLeftClicked ? styles["text-left"] : ""
+              } ${isAlignCenter ? styles["text-center"] : ""} ${
+                isSpacingClicekd ? styles["text-spacing"] : ""
+              } ${isListBullet ? styles["bullet-list"] : ""} ${
+                isListNum ? styles["numeric-list"] : ""
               }`}
               value={textareaValue}
               onChange={handleTextareaChange}
             />
+          </div>
+          <div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleUploadImage}
+              style={{ display: "none" }}
+            />
+
+            {selectedImage && (
+              <img
+                src={selectedImage}
+                alt="Image"
+                className={styles["input-image"]}
+              />
+            )}
           </div>
         </div>
       </div>

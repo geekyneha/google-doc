@@ -1,0 +1,22 @@
+.header-wrapper{
+    display: flex;
+}
+.google-logo{
+    margin: 10px;
+}
+.title-feature{
+    display: flex;
+    flex-direction: column;
+}
+.title{
+    font-size: 1.2rem;
+    margin: 5px ;
+}
+.title > span {
+    margin: 8px;
+}
+.feature> span{
+    margin: 0 0.8rem;
+    font-size: 14px;
+   
+}
